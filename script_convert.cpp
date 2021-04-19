@@ -1,13 +1,21 @@
 #include <iostream>
+#include <cstdlib>
+#include <ctime>
 #include <fstream>
 #include <iomanip>
 using namespace std;
 
 int main() {
-    string instance = "134";
-    int nWarehouses, nCustomers, i, j;
+    srand(time(nullptr));
+
+    string instance = "41";
+    int nWarehouses, nCustomers, i, j, randNum;
+
     ifstream origin("instances/cap"+instance+".txt");
     ofstream final("Warehouse_Location_Problem/Warehouse_Location_Problem.dat");
+
+    int maxWarehouse = 10, minWarehouse = 1;
+    int maxPercent = 30, minPercent = 20;
 
     //read nWarehouses & nCustomers
     origin >> nWarehouses;
@@ -31,17 +39,27 @@ int main() {
     }
     final << "};" << endl;    
 
+    //print warehouse limitations
+    final << "MaxWarehouse = " << maxWarehouse << ";" << endl;
+    final << "MinWarehouse = " << minWarehouse << ";" << endl;
+
     //read capacity & fixed costs
     for(i=0; i<nWarehouses; i++){
         origin >> cap[i][0];
         origin >> cap[i][1];
     }
 
-    //print capacity & fixed costs
+    //print capacity, minimum delivery & fixed costs
     final << "Capacity = [";  
     for(i=0; i<nWarehouses; i++){
         final << " " << cap[i][0];
     }
+    final << "];" << endl;
+
+    final << "MinDelivery = [";  
+        for(i=0; i<nWarehouses; i++){
+            final << " " << ((double)((rand()%(maxPercent-minPercent+1)) + minPercent))/100*cap[i][0];
+        }
     final << "];" << endl;
 
     final << "FixedCost = [";  
