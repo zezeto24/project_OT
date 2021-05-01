@@ -9,15 +9,15 @@ int main() {
     srand(time(nullptr));
 
     string instance = "41";
-    int nWarehouses, nCustomers, i, j, randNum;
+    int nWarehouses, nCustomers, i, j, k, randNum;
 
     ifstream origin("instances/cap"+instance+".txt");
     ofstream final("Warehouse_Location_Problem/Warehouse_Location_Problem.dat");
 
-    int maxWarehouse = 15, minWarehouse = 1;
-    int maxPercentMinDelivery = 30, minPercentMinDelivery = 20;
-    int maxPercentPdCost = 15, minPercentPdCost = 5;
-    int nProducts = 1;
+    int maxWarehouse = 15, minWarehouse = 1;                                //
+    int maxPercentMinDelivery = 30, minPercentMinDelivery = 20;             //
+    int offsetPdCost = 20, maxPdCost = 40;                                  //
+    int nProducts = 2;                                                      //
 
     //read nWarehouses & nCustomers
     origin >> nWarehouses;
@@ -116,36 +116,31 @@ int main() {
     final << "];" << endl;
 
     final << "TransportationCost = [" << endl;  
-    for(i=0; i<nWarehouses; i++){
-        final << "\t[";
-        for(j=0; j<nCustomers; j++)
-            final << " " << fixed << setprecision(5) << tpCost[i][j];
+    for (k=0; k<nProducts; k++) {
+        for(i=0; i<nWarehouses; i++){
+            if (i == 0)
+                final << "\t[[";
+            else
+                final << "\t [";
 
-        if (i != (nWarehouses-1))
-            final << "]," << endl;
-        else   
-            final << "] ";
+            if (k == 0) {    //print original transportation costs
+                for(j=0; j<nCustomers; j++)
+                    final << " " << fixed << setprecision(5) << tpCost[i][j];
+            }   
+            else {          //print newly generated transportation costs for new products
+                for(j=0; j<nCustomers; j++)
+                   final << " " << fixed << setprecision(5) << tpCost[i][j]+((double)(offsetPdCost-(rand()%(maxPdCost+1)))/100)*tpCost[i][j];
+            }          
+
+            if (i != (nWarehouses-1))
+                final << "]," << endl;
+            else if (k != (nProducts-1))   
+                final << "]], " << endl << endl;
+            else
+                final << "]] ";
+        }
     }
     final << "];" << endl;
-
-    //get average transportation cost for each warehouse
-    for(i=0; i<nWarehouses; i++){
-        for(j=0; j<nCustomers; j++)
-            pdCost[i] += tpCost[i][j]/nCustomers;
-    }
-
-    final << "ProductCost = [" << endl;  
-    for(i=0; i<nWarehouses; i++){
-        final << "\t[";
-        for(j=0; j<nProducts; j++)
-            final << " " << fixed << setprecision(5) << ((double)((rand()%(maxPercentPdCost-minPercentPdCost+1)) + minPercentPdCost))/100*pdCost[i];
-
-        if (i != (nWarehouses-1))
-            final << "]," << endl;
-        else   
-            final << "] ";
-    }
-    final << "];";
 
     final.close(); 
     origin.close();
