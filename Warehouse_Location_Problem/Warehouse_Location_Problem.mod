@@ -5,26 +5,30 @@
  *********************************************/
 
  //Sets:
- {int} Warehouses = ...; // Number of potential warehouses
- {int} Customers = ...; // Number of costumers
- {int} Products = ...; // Product types
+ {int} Warehouses = ...; 	// Number of potential warehouses
+ {int} Customers = ...; 	// Number of costumers
+ {int} Products = ...; 		// Product types
+ {int} Dummies = ...;		// Number of potential dummy warehouses
  int MinWarehouse = ...;
  int MaxWarehouse = ...;
  
  //Parameters:
  
 float Capacity[Warehouses][Products] = ...;
+float DummyCapacity[Dummies][Products] = ...;
 float MinDelivery[Warehouses] = ...;
 float FixedCost[Warehouses] = ...;
 float Demand[Customers][Products] = ...;
 float TransportationCost[Products][Warehouses][Customers] = ...;
+float DummyCost[Products][Warehouses][Dummies] = ...;
+int DummyCoverage[Dummies][Warehouses] = ...;
 
 //Decision Variables:
-dvar float+ FracDemand[Products][Warehouses][Customers];
+dvar float+ FracDemand[Dummies][Products][Warehouses][Customers];
 dvar boolean OpenWarehouse[Warehouses];
 
 minimize
-  (sum(i in Warehouses) sum(j in Customers) sum(k in Products) FracDemand[k][i][j]*TransportationCost[k][i][j]) + (sum(i in Warehouses) OpenWarehouse[i]*FixedCost[i]);
+  (sum(i in Warehouses) sum(j in Customers) sum(k in Products) sum(z in Dummies) FracDemand[z][k][i][j]*(TransportationCost[k][i][j]+DummyCost[k][i][z])) + (sum(i in Warehouses) OpenWarehouse[i]*FixedCost[i]);
   
 
 subject to {

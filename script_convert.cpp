@@ -3,13 +3,15 @@
 #include <ctime>
 #include <fstream>
 #include <iomanip>
+#include <math.h>
+#include <numeric>
 using namespace std;
 
 int main() {
     srand(time(nullptr));
 
     string instance = "41";
-    int nWarehouses, nCustomers, i, j, k, randNum;
+    int nWarehouses, nCustomers, i, j, k, randNum, sum;
 
     ifstream origin("instances/cap"+instance+".txt");
     ofstream final("Warehouse_Location_Problem/Warehouse_Location_Problem.dat");
@@ -18,6 +20,7 @@ int main() {
     int maxPercentMinDelivery = 30, minPercentMinDelivery = 20;             //
     int offsetPdCost = 20, maxPdCost = 40;                                  //
     int nProducts = 2;                                                      //
+    int nDummies = 10;                                                      //
 
     //read nWarehouses & nCustomers
     origin >> nWarehouses;
@@ -28,8 +31,10 @@ int main() {
     int demand[nCustomers] = {0};
     double tpCost[nWarehouses][nCustomers] = {0};
     double pdCost[nWarehouses] = {0};
+    int usedResellers = 0;
+    int dummies[nDummies] = {0};
 
-    //print list of warehouses, costumers and products
+    //print list of warehouses, costumers, products, and dummy warehouses
     final << "Warehouses = {";
     for(i=1; i<=nWarehouses; i++){
         final << " " << i;
@@ -46,7 +51,43 @@ int main() {
     for(i=1; i<=nProducts; i++){
         final << " " << i;
     }
-    final << "};" << endl;        
+    final << "};" << endl;
+
+    final << "Dummies = {";
+    for(i=1; i<=nDummies; i++){
+        final << " " << i;
+    }
+    final << "};" << endl;         
+
+    //allocate resellers
+    int nDummyResellers = round(0.3*nDummies);
+
+    for(i=0; i<nDummies; i++){
+        if ((usedResellers < nDummyResellers) && (rand()%2)){
+            usedResellers++;
+            dummies[i] = 1;
+        }
+        if ((nDummies-i) == (nDummyResellers-usedResellers)){
+            for(j=i; j<nDummies; j++){
+                dummies[j] = 1;
+            }
+            break;
+        }
+    }
+
+    //create coverage matrix for dummies
+    final << "DummyCoverage = [" << endl;  
+    for(i=0; i<nDummies; i++){
+        final << "\t[";
+        for(j=0; j<nWarehouses; j++)
+            final << " " << (rand()%2); 
+
+        if (i != (nDummies-1))
+            final << "]," << endl;
+        else   
+            final << "] ";
+    }
+    final << "];" << endl;
 
     //print warehouse limitations
     final << "MaxWarehouse = " << maxWarehouse << ";" << endl;
@@ -58,13 +99,13 @@ int main() {
         origin >> cap[i][1];
     }
 
-    //print capacity, minimum delivery & fixed costs
+    //print capacity, dummy capacity, minimum delivery & fixed costs
     final << "Capacity = [" << endl;  
     for(i=0; i<nWarehouses; i++){
         final << "\t[";
         for(j=0; j<nProducts; j++){
             if (j != 0)
-                final << " " << ((double)((rand()%(12-8+1)) + 8))/10 * cap[i][0];
+                final << " " << ((double)((rand()%(12-8+1)) + 8))/10 * cap[i][0];   //generate values between 0.8 and 1.2 the original value
             else
                 final << " " << cap[i][0];
         }
@@ -74,7 +115,30 @@ int main() {
         else   
             final << "] ";
     }
+    final << "];" << endl;
 
+    //calculate average capacity per number of dummies
+    for(k=0; k<nWarehouses; k++){
+            sum += cap[k][0];
+    }
+    sum = sum/nDummies;
+
+    final << "DummyCapacity = [" << endl;  
+    for(i=0; i<nDummies; i++){
+        final << "\t[";
+
+        for(j=0; j<nProducts; j++){
+            if (dummies[i])
+                final << " " << 0.4*sum;
+            else
+                final << " " << 2*sum;
+        }
+
+        if (i != (nDummies-1))
+            final << "]," << endl;
+        else   
+            final << "] ";
+    }
     final << "];" << endl;
 
     final << "MinDelivery = [";  
@@ -132,6 +196,33 @@ int main() {
                    final << " " << fixed << setprecision(5) << tpCost[i][j]+((double)(offsetPdCost-(rand()%(maxPdCost+1)))/100)*tpCost[i][j];
             }          
 
+            if (i != (nWarehouses-1))
+                final << "]," << endl;
+            else if (k != (nProducts-1))   
+                final << "]], " << endl << endl;
+            else
+                final << "]] ";
+        }
+    }
+    final << "];" << endl;
+
+    //finish computing costs
+    final << "DummyCost = [" << endl;  
+    for (k=0; k<nProducts; k++) {
+        for(i=0; i<nWarehouses; i++){
+            if (i == 0)
+                final << "\t[[";
+            else
+                final << "\t [";
+
+            for(j=0; j<nDummies; j++) {
+                if (dummies[j])
+                    //generate values of 0.2 or -0.2 times the original value, depending on dummy type
+                    final << " " << fixed << setprecision(5) << -0.2*tpCost[i][j];            
+                else
+                    final << " " << fixed << setprecision(5) << 0.2*tpCost[i][j];                          
+            }
+                
             if (i != (nWarehouses-1))
                 final << "]," << endl;
             else if (k != (nProducts-1))   
