@@ -33,17 +33,17 @@ minimize
 
 subject to {
   
-  forall (j in Customers, k in Products)	
+  forall (j in Customers, k in Products, z in Dummies)	
     ctDemand:
-    sum(i in Warehouses) FracDemand[k][i][j] >= 1;
+    sum(i in Warehouses) FracDemand[z][k][i][j] >= 1;
   
-  forall (i in Warehouses, k in Products)
+  forall (i in Warehouses, k in Products, z in Dummies)
     ctWarehouseCapacity:
-    sum(j in Customers) Demand[j][k]*FracDemand[k][i][j] <= Capacity[i][k]*OpenWarehouse[i];
+    sum(j in Customers) Demand[j][k]*FracDemand[z][k][i][j] <= Capacity[i][k]*OpenWarehouse[i];
 
-  forall (i in Warehouses, j in Customers, k in Products)
+  forall (i in Warehouses, j in Customers, k in Products, z in Dummies)
     ctDemandFraction:
-    FracDemand[k][i][j] <= minl(1, (Capacity[i][k]/Demand[j][k]))*OpenWarehouse[i];
+    FracDemand[z][k][i][j] <= minl(1, (Capacity[i][k]/Demand[j][k]))*OpenWarehouse[i];
     
   ctWarehouseMinLimit:
   sum(i in Warehouses) OpenWarehouse[i] >= MinWarehouse;  
@@ -53,6 +53,9 @@ subject to {
   
   forall (i in Warehouses)
     ctWarehouseMinDelivery:
-    sum(j in Customers) (sum(k in Products) Demand[j][k]*FracDemand[k][i][j]) >= MinDelivery[i]*OpenWarehouse[i]; 
-  
+    sum(j in Customers) (sum(k in Products) (sum(z in Dummies) Demand[j][k]*FracDemand[z][k][i][j])) >= MinDelivery[i]*OpenWarehouse[i]; 
+    
+  forall ( k in Products, z in Dummies)
+    ctDummiesCapacity:
+    sum(i in Warehouses) (sum(j in Customers) (Demand[j][k]*FracDemand[z][k][i][j])*DummyCoverage[z][i]) <= DummyCapacity[z][k];
 }
