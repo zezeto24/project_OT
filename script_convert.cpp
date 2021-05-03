@@ -11,15 +11,16 @@ int main() {
     srand(time(nullptr));
 
     string instance = "41";
-    int nWarehouses, nCustomers, i, j, k, randNum, sum;
+    int nWarehouses, nCustomers, i, j, k, randNum;
+    int sum = 0;
 
     ifstream origin("instances/cap"+instance+".txt");
     ofstream final("Warehouse_Location_Problem/Warehouse_Location_Problem.dat");
 
-    int maxWarehouse = 15, minWarehouse = 1;                                //
-    int maxPercentMinDelivery = 30, minPercentMinDelivery = 20;             //
+    int maxWarehouse = 13, minWarehouse = 1;                                //
+    int maxPercentMinDelivery = 10, minPercentMinDelivery = 5;              //
     int offsetPdCost = 20, maxPdCost = 40;                                  //
-    int nProducts = 2;                                                      //
+    int nProducts = 5;                                                      //
     int nDummies = 10;                                                      //
 
     //read nWarehouses & nCustomers
@@ -117,8 +118,8 @@ int main() {
     }
     final << "];" << endl;
 
-    //calculate average capacity per number of dummies
-    for(k=0; k<nWarehouses; k++){
+    //calculate average capacity per number of dummies (We need the Max number of warehouse and not he number of warehouses)
+    for(k=0; k<maxWarehouse; k++){
             sum += cap[k][0];
     }
     sum = sum/nDummies;
@@ -218,9 +219,9 @@ int main() {
             for(j=0; j<nDummies; j++) {
                 if (dummies[j])
                     //generate values of 0.2 or -0.2 times the original value, depending on dummy type
-                    final << " " << fixed << setprecision(5) << -0.2*tpCost[i][j];            
+                    final << " " << fixed << setprecision(5) << 0.1*tpCost[i][j];            
                 else
-                    final << " " << fixed << setprecision(5) << 0.2*tpCost[i][j];                          
+                    final << " " << fixed << setprecision(5) << 0.3*tpCost[i][j];                          
             }
                 
             if (i != (nWarehouses-1))
