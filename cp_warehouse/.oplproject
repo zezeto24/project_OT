@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="ASCII"?><project>
+	<version>1.0</version>
+	<configs>
+		<config default="true" name="Configuration1" category="opl">
+			<ref name="cp_warehouse.mod" type="model">
+			</ref>
+			<ref name="cp_warehouse.ops" type="setting">
+			</ref>
+			<ref name="cp_warehouse.dat" type="data">
+			</ref>
+		</config>
+	</configs>
+	
+</project>
