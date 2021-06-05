@@ -14,7 +14,7 @@ int MaxWarehouse = ...;
  
 //Parameters:
 int Capacity[Warehouses][Products] = ...;
-float DummyCapacity[Dummies][Products] = ...;
+int DummyCapacity[Dummies][Products] = ...;
 float MinDelivery[Warehouses] = ...;
 float FixedCost[Warehouses] = ...;
 float Demand[Customers][Products] = ...;
@@ -23,7 +23,7 @@ float DummyCost[Products][Warehouses][Dummies] = ...;
 int DummyCoverage[Dummies][Warehouses] = ...;
 
 //Decision Variables:
-dvar int+ SuppDemand[z in Dummies][k in Products][i in Warehouses][j in Customers] in 0..Capacity[i][k]*DummyCoverage[z][i];
+dvar int+ SuppDemand[z in Dummies][k in Products][i in Warehouses][j in Customers] in 0..DummyCapacity[z][k]*DummyCoverage[z][i];
 dvar boolean OpenWarehouse[Warehouses];
 
 //Objective Function:
@@ -35,5 +35,21 @@ subject to
 	forall (j in Customers, k in Products)	
     	ctDemand:
     	sum(i in Warehouses) sum(z in Dummies) SuppDemand[z][k][i][j] >= Demand[j][k];
-    	    
+    	
+    forall (i in Warehouses, k in Products)
+    	ctWarehouseCapacity:
+    	sum(j in Customers) (sum(z in Dummies) SuppDemand[z][k][i][j]) <= Capacity[i][k]*OpenWarehouse[i];
+    	
+    forall (i in Warehouses)
+    	ctWarehouseMinDelivery:
+    	sum(j in Customers) (sum(k in Products) (sum(z in Dummies) SuppDemand[z][k][i][j])) >= MinDelivery[i]*OpenWarehouse[i]; 
+    
+    ctWarehouseMinLimit:
+  	sum(i in Warehouses) OpenWarehouse[i] >= MinWarehouse;  
+  
+  	ctWarehouseMaxLimit:
+  	sum(i in Warehouses) OpenWarehouse[i] <= MaxWarehouse;  
+  	
 }
+
+execute{cplex.setParam(IloCplex.DoubleParam.TiLim, 1)};
