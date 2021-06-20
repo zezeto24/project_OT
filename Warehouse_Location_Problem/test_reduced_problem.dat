@@ -1,7 +1,5 @@
 Warehouses = { 1 2 3 4 5};
 Customers = { 1 2 3 4 5 6 7 8 9 10};
-MaxWarehouse = 3;
-MinWarehouse = 3;
 Capacity = [ 5000 5000 5000 5000 5000];
 FixedCost = [ 7500 7500 7500 7500 7500];
 Demand = [ 146 87 672 1337 31 559 2370 1089 33 32];

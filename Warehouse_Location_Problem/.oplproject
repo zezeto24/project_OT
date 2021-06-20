@@ -9,6 +9,14 @@
 			<ref name="Warehouse_Location_Problem.dat" type="data">
 			</ref>
 		</config>
+		<config default="false" name="Configuration2" category="opl">
+			<ref name="test_reduced_problem.mod" type="model">
+			</ref>
+			<ref name="test_reduced_problem.ops" type="setting">
+			</ref>
+			<ref name="test_reduced_problem.dat" type="data">
+			</ref>
+		</config>
 	</configs>
 	
 </project>
