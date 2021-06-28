@@ -4,12 +4,14 @@
 using namespace std;
 
 int main() {
-    string instance = "41";
+    string instance = "51";
     int nWarehouses, nCustomers, i, j;
     ifstream origin("instances/cap"+instance+".txt");
-    ofstream final("cp_warehouse/cp_warehouse.dat");
+    //ofstream final("cp_warehouse/cp_warehouse.dat");
+    ofstream final("Warehouse_Location_Problem/test_reduced_problem.dat");
 
-    int maxWarehouse = 3, minWarehouse = 3;
+    int maxWarehouse = 10, minWarehouse = 7;
+    int maxPercentMinDelivery = 20, minPercentMinDelivery = 15;
 
     //read nWarehouses & nCustomers
     origin >> nWarehouses;
@@ -54,7 +56,7 @@ int main() {
     final << "MaxWarehouse = " << maxWarehouse << ";" << endl;
     final << "MinWarehouse = " << minWarehouse << ";" << endl;
 
-    //print capacity & fixed costs
+    //print capacity, fixed costs & min delivery
     final << "Capacity = [";  
     for(i=0; i<nWarehouses; i++){
         final << " " << cap[i][0];
@@ -65,6 +67,12 @@ int main() {
     for(i=0; i<nWarehouses; i++){
         final << " " << cap[i][1];
     }
+    final << "];" << endl;
+
+    final << "MinDelivery = [";  
+        for(i=0; i<nWarehouses; i++){
+            final << " " << ((double)((rand()%(maxPercentMinDelivery-minPercentMinDelivery+1)) + minPercentMinDelivery))/100*cap[i][0];
+        }
     final << "];" << endl;
 
     //print demand & transportation costs

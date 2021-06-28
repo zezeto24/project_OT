@@ -13,7 +13,7 @@ int MaxWarehouse = ...;
  //Parameters:
  
 float Capacity[Warehouses] = ...;
-//float MinDelivery[Warehouses] = ...;
+float MinDelivery[Warehouses] = ...;
 float FixedCost[Warehouses] = ...;
 float Demand[Customers] = ...;
 float TransportationCost[Warehouses][Customers] = ...;
@@ -45,8 +45,8 @@ subject to {
   ctWarehouseMaxLimit:
   sum(i in Warehouses) OpenWarehouse[i] <= MaxWarehouse;  
   
-  //forall (i in Warehouses)
-    //ctWarehouseMinDelivery:
-    //sum(j in Customers) Demand[j]*FracDemand[i][j] >= MinDelivery[i]*OpenWarehouse[i]; 
+  forall (i in Warehouses)
+    ctWarehouseMinDelivery:
+    sum(j in Customers) Demand[j]*FracDemand[i][j] >= MinDelivery[i]*OpenWarehouse[i]; 
   
 }

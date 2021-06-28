@@ -4,44 +4,44 @@
  *********************************************/
  using CP;
  
-//execute{
-//   cp.param.TimeLimit = 60;	//seconds
-//}
+execute{
+   cp.param.TimeLimit = 36000;	//seconds
+}
  
 //Sets:
 {int} Warehouses = ...; 	// Number of potential warehouses
 {int} Customers = ...; 		// Number of costumers
-//{int} Products = ...; 		// Product types
-//{int} Dummies = ...;		// Number of potential dummy warehouses
+{int} Products = ...; 		// Product types
+{int} Dummies = ...;		// Number of potential dummy warehouses
 int MinWarehouse = ...;
 int MaxWarehouse = ...;
  
 //Parameters:
-//int Capacity[Warehouses][Products] = ...;
-int Capacity[Warehouses] = ...;
-//int DummyCapacity[Dummies][Products] = ...;
-//float MinDelivery[Warehouses] = ...;
+float Capacity[Warehouses][Products] = ...;
+//int Capacity[Warehouses] = ...;
+int DummyCapacity[Dummies][Products] = ...;
+float MinDelivery[Warehouses] = ...;
 int FixedCost[Warehouses] = ...;
-//float Demand[Customers][Products] = ...;
-int Demand[Customers] = ...;
-//float TransportationCost[Products][Warehouses][Customers] = ...;
-float TransportationCost[Warehouses][Customers] = ...;
-//float DummyCost[Products][Warehouses][Dummies] = ...;
-//int DummyCoverage[Dummies][Warehouses] = ...;
+int Demand[Customers][Products] = ...;
+//int Demand[Customers] = ...;
+float TransportationCost[Products][Warehouses][Customers] = ...;
+//float TransportationCost[Warehouses][Customers] = ...;
+float DummyCost[Products][Warehouses][Dummies] = ...;
+int DummyCoverage[Dummies][Warehouses] = ...;
 
 //Decision Variables:
-//dvar int+ SuppDemand[z in Dummies][k in Products][i in Warehouses][j in Customers] in 0..DummyCapacity[z][k]*DummyCoverage[z][i];
-dvar int+ SuppDemand[i in Warehouses][j in Customers] in 0..Capacity[i];
+dvar int+ SuppDemand[z in Dummies][k in Products][i in Warehouses][j in Customers] in 0..DummyCapacity[z][k]*DummyCoverage[z][i];
+//dvar int+ SuppDemand[i in Warehouses][j in Customers] in 0..Capacity[i];
 dvar boolean OpenWarehouse[Warehouses];
 
 //Objective Function:
-//dexpr float totalCost = sum(i in Warehouses) sum(k in Products) ( sum(j in Customers)(TransportationCost[k][i][j] * sum(z in Dummies)SuppDemand[z][k][i][j]) + sum(z in Dummies)(DummyCost[k][i][z] * sum(j in Customers) SuppDemand[z][k][i][j]))  + (sum(i in Warehouses) OpenWarehouse[i]*FixedCost[i]);
-dexpr float totalCost = (sum(i in Warehouses) sum(j in Customers) SuppDemand[i][j]/Demand[j]*TransportationCost[i][j]) + (sum(i in Warehouses)OpenWarehouse[i]*FixedCost[i]);
+dexpr float totalCost = sum(i in Warehouses) sum(k in Products) ( sum(j in Customers)(TransportationCost[k][i][j] * sum(z in Dummies)SuppDemand[z][k][i][j]/Demand[j][k]) + sum(z in Dummies)(DummyCost[k][i][z] * sum(j in Customers) SuppDemand[z][k][i][j]/Demand[j][k]))  + (sum(i in Warehouses) OpenWarehouse[i]*FixedCost[i]);
+//dexpr float totalCost = (sum(i in Warehouses) sum(j in Customers) SuppDemand[i][j]/Demand[j]*TransportationCost[i][j]) + (sum(i in Warehouses)OpenWarehouse[i]*FixedCost[i]);
 minimize totalCost;
 
 subject to
 {
-  /*
+  
 	forall (j in Customers, k in Products)	
     	ctDemand:
     	sum(i in Warehouses) sum(z in Dummies) SuppDemand[z][k][i][j] >= Demand[j][k];
@@ -59,8 +59,8 @@ subject to
   
   	ctWarehouseMaxLimit:
   	sum(i in Warehouses) OpenWarehouse[i] <= MaxWarehouse;  
-  */
-  	
+  
+  /*	
   	forall (j in Customers)	
     	ctDemand:
     	sum(i in Warehouses) SuppDemand[i][j] >= Demand[j];
@@ -77,5 +77,10 @@ subject to
   	sum(i in Warehouses) OpenWarehouse[i] >= MinWarehouse;  
   
   	ctWarehouseMaxLimit:
-  	sum(i in Warehouses) OpenWarehouse[i] <= MaxWarehouse;  
+  	sum(i in Warehouses) OpenWarehouse[i] <= MaxWarehouse; 
+  	
+  	forall (i in Warehouses)
+    	ctWarehouseMinDelivery:
+    	sum(j in Customers) SuppDemand[i][j] >= MinDelivery[i]*OpenWarehouse[i];  
+   */
 }

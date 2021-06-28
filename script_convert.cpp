@@ -15,9 +15,10 @@ int main() {
     int sum = 0;
 
     ifstream origin("instances/cap"+instance+".txt");
-    ofstream final("Warehouse_Location_Problem/Warehouse_Location_Problem.dat");
+    ofstream final("cp_warehouse/cp_warehouse.dat");
+    //ofstream final("Warehouse_Location_Problem/test_reduced_problem.dat");
 
-    int maxWarehouse = 13, minWarehouse = 1;                                //
+    int maxWarehouse = 16, minWarehouse = 0;                                //
     int maxPercentMinDelivery = 10, minPercentMinDelivery = 5;              //
     int offsetPdCost = 20, maxPdCost = 40;                                  //
     int nProducts = 5;                                                      //
@@ -34,6 +35,20 @@ int main() {
     double pdCost[nWarehouses] = {0};
     int usedResellers = 0;
     int dummies[nDummies] = {0};
+
+    //read capacity & fixed costs
+    for(i=0; i<nWarehouses; i++){
+        origin >> cap[i][0];
+        origin >> cap[i][1];
+    }
+
+    //read demand & transportation costs
+    for(j=0; j<nCustomers; j++){
+        origin >> demand[j];
+
+        for(i=0; i<nWarehouses; i++)
+            origin >> tpCost[i][j];
+    }
 
     //print list of warehouses, costumers, products, and dummy warehouses
     final << "Warehouses = {";
@@ -94,81 +109,13 @@ int main() {
     final << "MaxWarehouse = " << maxWarehouse << ";" << endl;
     final << "MinWarehouse = " << minWarehouse << ";" << endl;
 
-    //read capacity & fixed costs
-    for(i=0; i<nWarehouses; i++){
-        origin >> cap[i][0];
-        origin >> cap[i][1];
-    }
-
-    //print capacity, dummy capacity, minimum delivery & fixed costs
-    final << "Capacity = [" << endl;  
-    for(i=0; i<nWarehouses; i++){
-        final << "\t[";
-        for(j=0; j<nProducts; j++){
-            if (j != 0)
-                final << " " << ((double)((rand()%(12-8+1)) + 8))/10 * cap[i][0];   //generate values between 0.8 and 1.2 the original value
-            else
-                final << " " << cap[i][0];
-        }
-
-        if (i != (nWarehouses-1))
-            final << "]," << endl;
-        else   
-            final << "] ";
-    }
-    final << "];" << endl;
-
-    //calculate average capacity per number of dummies (We need the Max number of warehouse and not he number of warehouses)
-    for(k=0; k<maxWarehouse; k++){
-            sum += cap[k][0];
-    }
-    sum = sum/nDummies;
-
-    final << "DummyCapacity = [" << endl;  
-    for(i=0; i<nDummies; i++){
-        final << "\t[";
-
-        for(j=0; j<nProducts; j++){
-            if (dummies[i])
-                final << " " << 0.4*sum;
-            else
-                final << " " << 2*sum;
-        }
-
-        if (i != (nDummies-1))
-            final << "]," << endl;
-        else   
-            final << "] ";
-    }
-    final << "];" << endl;
-
-    final << "MinDelivery = [";  
-        for(i=0; i<nWarehouses; i++){
-            final << " " << ((double)((rand()%(maxPercentMinDelivery-minPercentMinDelivery+1)) + minPercentMinDelivery))/100*cap[i][0];
-        }
-    final << "];" << endl;
-
-    final << "FixedCost = [";  
-    for(i=0; i<nWarehouses; i++){
-        final << " " << cap[i][1];
-    }
-    final << "];" << endl;
-
-    //read demand & transportation costs
-    for(j=0; j<nCustomers; j++){
-        origin >> demand[j];
-
-        for(i=0; i<nWarehouses; i++)
-            origin >> tpCost[i][j];
-    }
-
     //print demand, transportation costs & product costs
     final << "Demand = [";  
     for(i=0; i<nCustomers; i++){
         final << "\t[";
         for(j=0; j<nProducts; j++){
             if (j != 0)
-                final << " " << ((double)((rand()%(12-8+1)) + 8))/10 * demand[i];
+                final << " " << (int)(((double)((rand()%(12-8+1)) + 8))/10 * demand[i]);
             else
                 final << " " << demand[i];
         }
@@ -231,6 +178,60 @@ int main() {
             else
                 final << "]] ";
         }
+    }
+    final << "];" << endl;
+
+    //print capacity, dummy capacity, minimum delivery & fixed costs
+    final << "Capacity = [" << endl;  
+    for(i=0; i<nWarehouses; i++){
+        final << "\t[";
+        for(j=0; j<nProducts; j++){
+            if (j != 0)
+                final << " " << ((double)((rand()%(12-8+1)) + 8))/10 * cap[i][0];   //generate values between 0.8 and 1.2 the original value
+            else
+                final << " " << cap[i][0];
+        }
+
+        if (i != (nWarehouses-1))
+            final << "]," << endl;
+        else   
+            final << "] ";
+    }
+    final << "];" << endl;
+
+    //calculate average capacity per number of dummies (We need the Max number of warehouse and not he number of warehouses)
+    for(k=0; k<maxWarehouse; k++){
+            sum += cap[k][0];
+    }
+    sum = sum/nDummies;
+
+    final << "DummyCapacity = [" << endl;  
+    for(i=0; i<nDummies; i++){
+        final << "\t[";
+
+        for(j=0; j<nProducts; j++){
+            if (dummies[i])
+                final << " " << (int) (0.4*sum);
+            else
+                final << " " << 2*sum;
+        }
+
+        if (i != (nDummies-1))
+            final << "]," << endl;
+        else   
+            final << "] ";
+    }
+    final << "];" << endl;
+
+    final << "MinDelivery = [";  
+        for(i=0; i<nWarehouses; i++){
+            final << " " << ((double)((rand()%(maxPercentMinDelivery-minPercentMinDelivery+1)) + minPercentMinDelivery))/100*cap[i][0];
+        }
+    final << "];" << endl;
+
+    final << "FixedCost = [";  
+    for(i=0; i<nWarehouses; i++){
+        final << " " << (int) (cap[i][1]);
     }
     final << "];" << endl;
 
